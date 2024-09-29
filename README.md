@@ -18,8 +18,8 @@ EncryptedDatabase is a decentralized and encrypted database solution that runs o
 
 ### What You Need
 
-- [DFINITY Canister SDK](https://sdk.dfinity.org/)
-- [Node.js](https://nodejs.org/) (version 12 or higher)
+- [DFINITY Canister Developer Kit](https://internetcomputer.org/docs/current/developer-docs/getting-started/install/)
+- [Node.js](https://nodejs.org/) (version 20.17 or higher)
 - [mops](https://github.com/mops-cli/mops)
 
 ### How to Set Up
