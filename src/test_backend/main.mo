@@ -141,6 +141,23 @@ actor EncryptedDatabase {
         }
     };
 
+    // Retrieves all details of a specific table
+    public shared query(msg) func selectAll(callerId : Principal, tableName : Text) : async Result.Result<[[Text]], Text> {
+        let userTableMap = getUserTables(callerId);
+        switch (userTableMap.get(tableName)) {
+            case (null) { #err("Table not found") };
+            case (?table) {
+                if (table.owner != callerId) {
+                    return #err("Access denied: You don't own this table");
+                };
+                let result = Array.map<[Blob], [Text]>(table.rows, func(row) {
+                    Array.map<Blob, Text>(row, decrypt)
+                });
+                #ok(result)
+            };
+        }
+    };
+
     // Deletes a specified table
     public shared(msg) func dropTable(callerId : Principal, tableName : Text) : async Result.Result<(), Text> {
         let userTableMap = getUserTables(callerId);
