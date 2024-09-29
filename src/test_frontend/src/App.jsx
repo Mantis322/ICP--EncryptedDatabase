@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { test_backend } from 'declarations/test_backend';
 import { AuthClient } from '@dfinity/auth-client';
-import '../assets/main.css';
 
 const INTERNET_IDENTITY = process.env.CANISTER_ID_INTERNET_IDENTITY;
 
@@ -22,7 +21,15 @@ function App() {
 
   useEffect(() => {
     initAuth();
+    injectKeyframes();
   }, []);
+
+  const injectKeyframes = () => {
+    const style = document.createElement('style');
+    style.type = 'text/css';
+    style.appendChild(document.createTextNode(spinnerKeyframes));
+    document.head.appendChild(style);
+  };
 
   const initAuth = async () => {
     const client = await AuthClient.create();
@@ -147,7 +154,6 @@ function App() {
         throw new Error(result.err);
       }
       setNewRowData({});
-      // Refresh table details after inserting
       handleSelectTable(selectedTable.name);
     } catch (err) {
       showError(`Failed to insert row: ${err.message}`);
@@ -207,127 +213,133 @@ function App() {
   };
 
   return (
-    <div className="App relative">
+    <div style={{ maxWidth: '1200px', margin: '20px auto', padding: '20px', backgroundColor: '#f9f9f9', borderRadius: '8px', position: 'relative' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+        <h1>Encrypted Database</h1>
+        {!isAuthenticated ? (
+          <button onClick={login} style={buttonPrimaryStyle}>Login with Internet Identity</button>
+        ) : (
+          <div style={{ textAlign: 'right' }}>
+            <p>Logged in as: {userPrincipal ? userPrincipal.toText() : 'Unknown'}</p>
+            <button onClick={logout} style={buttonDangerStyle}>Logout</button>
+          </div>
+        )}
+      </div>
+
+      {error && <div style={errorMessageStyle}>{error}</div>}
       {isLoading && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 z-50 flex justify-center items-center">
-          <div className="bg-white p-5 rounded-lg shadow-xl">
-            <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
-            <p className="mt-4 text-gray-700 font-semibold">Yükleniyor...</p>
-          </div>
+        <div style={overlayStyle}>
+          <div style={spinnerStyle} />
+          <p style={loadingTextStyle}>Loading...</p>
         </div>
       )}
-  
-      <h1>Encrypted Database</h1>
-      
-      {!isAuthenticated ? (
-        <button onClick={login} className="auth-button">Login with Internet Identity</button>
-      ) : (
-        <div className="user-info">
-          <p>Logged in as: {userPrincipal ? userPrincipal.toText() : 'Unknown'}</p>
-          <button onClick={logout} className="auth-button">Logout</button>
-        </div>
-      )}
-  
-      {error && <div className="error-message">{error}</div>}
-      
+
       {isAuthenticated && (
-        <>
-          <div className="create-table-section">
+        <div>
+          <div style={sectionStyle}>
             <h2>Create New Table</h2>
-            <input
-              type="text"
-              value={newTableName}
-              onChange={(e) => setNewTableName(e.target.value)}
-              placeholder="Table Name"
-            />
-            {newTableColumns.map((col, index) => (
-              <div key={index} className="column-input">
-                <input
-                  type="text"
-                  value={col}
-                  onChange={(e) => handleColumnChange(index, e.target.value)}
-                  placeholder={`Column ${index + 1}`}
-                />
-                <button onClick={() => handleRemoveColumn(index)}>Remove</button>
+            <div>
+              <input
+                type="text"
+                value={newTableName}
+                onChange={(e) => setNewTableName(e.target.value)}
+                placeholder="Table Name"
+                style={inputStyle}
+              />
+              {newTableColumns.map((col, index) => (
+                <div key={index} style={formGroupRowStyle}>
+                  <input
+                    type="text"
+                    value={col}
+                    onChange={(e) => handleColumnChange(index, e.target.value)}
+                    placeholder={`Column ${index + 1}`}
+                    style={inputStyle}
+                  />
+                  <button onClick={() => handleRemoveColumn(index)} style={buttonDangerStyle}>Remove</button>
+                </div>
+              ))}
+              <div style={{ textAlign: 'right' }}>
+                <button onClick={handleAddColumn} style={buttonSecondaryStyle}>Add Column</button>
+                <button onClick={handleCreateTable} style={buttonPrimaryStyle}>Create Table</button>
               </div>
-            ))}
-            <button onClick={handleAddColumn}>Add Column</button>
-            <button onClick={handleCreateTable}>Create Table</button>
+            </div>
           </div>
-          
-          <div className="tables-list">
+
+          <div style={sectionStyle}>
             <h2>Your Tables</h2>
-            <ul>
+            <ul style={{ listStyleType: 'none', padding: '0' }}>
               {tables.map(table => (
-                <li key={table}>
-                  <span onClick={() => handleSelectTable(table)}>{table}</span>
-                  <button onClick={() => handleDeleteTable(table)} className="delete-button">Delete</button>
+                <li key={table} style={tableListItemStyle}>
+                  <span onClick={() => handleSelectTable(table)} style={tableNameStyle}>{table}</span>
+                  <button onClick={() => handleDeleteTable(table)} style={{ ...buttonDangerStyle, marginLeft: 'auto' }}>Delete</button>
                 </li>
               ))}
             </ul>
           </div>
-          
+
           {selectedTable && (
-            <div className="selected-table">
+            <div style={sectionStyle}>
               <h2>{selectedTable.name}</h2>
               <p>Columns: {selectedTable.columns.join(', ')}</p>
               <p>Rows: {selectedTable.rowCount}</p>
-              
+
               <h3>Insert New Row</h3>
               {selectedTable.columns.map(col => (
                 <input
                   key={col}
                   type="text"
                   value={newRowData[col] || ''}
-                  onChange={(e) => setNewRowData({...newRowData, [col]: e.target.value})}
+                  onChange={(e) => setNewRowData({ ...newRowData, [col]: e.target.value })}
                   placeholder={col}
+                  style={inputStyle}
                 />
               ))}
-              <button onClick={handleInsertRow}>Insert Row</button>
-              
-              <h3>Query Data</h3>
-              <div className="query-buttons">
-                {selectedTable.columns.map(col => (
-                  <button key={col} onClick={() => handleQuery(col)}>Query {col}</button>
-                ))}
-                <button onClick={handleQueryAll}>Query All Data</button>
+              <div style={{ textAlign: 'right' }}>
+                <button onClick={handleInsertRow} style={buttonPrimaryStyle}>Insert Row</button>
               </div>
-              
+
+              <h3>Query Data</h3>
+              <div style={{ textAlign: 'right' }}>
+                {selectedTable.columns.map(col => (
+                  <button key={col} onClick={() => handleQuery(col)} style={buttonSecondaryStyle}>Query {col}</button>
+                ))}
+                <button onClick={handleQueryAll} style={buttonSecondaryStyle}>Query All Data</button>
+              </div>
+
               {queryResult.length > 0 && (
-                <table>
+                <table style={resultTableStyle}>
                   <thead>
                     <tr>
-                      <th>Index</th>
-                      <th>Value</th>
+                      <th style={tableHeaderCellStyle}>Index</th>
+                      <th style={tableHeaderCellStyle}>Value</th>
                     </tr>
                   </thead>
                   <tbody>
                     {queryResult.map((item, index) => (
                       <tr key={index}>
-                        <td>{index + 1}</td>
-                        <td>{item}</td>
+                        <td style={tableCellStyle}>{index + 1}</td>
+                        <td style={tableCellStyle}>{item}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               )}
-              
               {allData.length > 0 && (
-                <table>
+                <table style={resultTableStyle}>
                   <thead>
                     <tr>
-                      <th>Row</th>
+                      <th style={tableHeaderCellStyle}>Index</th>
                       {selectedTable.columns.map(col => (
-                        <th key={col}>{col}</th>
+                        <th key={col} style={tableHeaderCellStyle}>{col}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody>
-                    {allData.map((row, rowIndex) => (
-                      <tr key={rowIndex}>
-                        <td>{rowIndex + 1}</td>
+                    {allData.map((row, index) => (
+                      <tr key={index}>
+                        <td style={tableCellStyle}>{index + 1}</td>
                         {row.map((cell, cellIndex) => (
-                          <td key={cellIndex}>{cell}</td>
+                          <td key={cellIndex} style={tableCellStyle}>{cell}</td>
                         ))}
                       </tr>
                     ))}
@@ -336,10 +348,148 @@ function App() {
               )}
             </div>
           )}
-        </>
+        </div>
       )}
     </div>
   );
 }
 
-export default App;
+const overlayStyle = {
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  backgroundColor: 'rgba(255, 255, 255, 0.8)',
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'center',
+  alignItems: 'center',
+  zIndex: 1000,
+};
+
+const spinnerKeyframes = `
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+`;
+
+const spinnerStyle = {
+  border: '4px solid #f3f3f3',
+  borderTop: '4px solid #3498db',
+  borderRadius: '50%',
+  width: '40px',
+  height: '40px',
+  animation: 'spin 1s linear infinite',
+};
+
+const loadingTextStyle = {
+  marginTop: '10px',
+  fontSize: '18px',
+  color: '#3498db',
+};
+
+const buttonPrimaryStyle = {
+  backgroundColor: '#28a745',
+  color: 'white',
+  padding: '10px 15px',
+  border: 'none',
+  cursor: 'pointer',
+  borderRadius: '4px',
+  fontWeight: 'bold',
+  marginLeft: '10px',
+};
+
+const buttonSecondaryStyle = {
+  backgroundColor: '#17a2b8',
+  color: 'white',
+  padding: '10px 15px',
+  border: 'none',
+  cursor: 'pointer',
+  borderRadius: '4px',
+  fontWeight: 'bold',
+  marginLeft: '10px',
+};
+
+const buttonDangerStyle = {
+  backgroundColor: '#dc3545',
+  color: 'white',
+  padding: '10px 15px',
+  border: 'none',
+  cursor: 'pointer',
+  borderRadius: '4px',
+  fontWeight: 'bold',
+  marginLeft: '10px',
+};
+
+const inputStyle = {
+  width: '100%',
+  padding: '10px',
+  marginBottom: '10px',
+  border: '1px solid #ccc',
+  borderRadius: '4px',
+};
+
+const formGroupRowStyle = {
+  display: 'flex',
+  alignItems: 'center',
+  marginBottom: '10px',
+};
+
+const sectionStyle = {
+  marginBottom: '30px',
+  padding: '20px',
+  backgroundColor: '#fff',
+  borderRadius: '8px',
+  boxShadow: '0px 0px 10px rgba(0, 0, 0, 0.1)',
+};
+
+const tableListItemStyle = {
+  display: 'flex',
+  alignItems: 'center',
+  padding: '10px',
+  marginBottom: '5px',
+  borderRadius: '4px',
+  backgroundColor: '#f1f1f1',
+};
+
+const tableNameStyle = {
+  cursor: 'pointer',
+  fontWeight: 'bold',
+  flex: '1',
+};
+
+const errorMessageStyle = {
+  color: '#dc3545',
+  fontWeight: 'bold',
+  marginBottom: '20px',
+};
+
+const loadingSpinnerStyle = {
+  color: '#007bff',
+  fontWeight: 'bold',
+  marginBottom: '20px',
+};
+
+const resultTableStyle = {
+  width: '100%',
+  borderCollapse: 'collapse',
+  marginTop: '20px',
+};
+
+const tableHeaderCellStyle = {
+  borderBottom: '2px solid #ddd',
+  textAlign: 'left',
+  padding: '10px',
+  backgroundColor: '#f8f8f8',
+  fontWeight: 'bold',
+};
+
+const tableCellStyle = {
+  borderBottom: '1px solid #ddd',
+  textAlign: 'left',
+  padding: '10px',
+};
+
+export default App
