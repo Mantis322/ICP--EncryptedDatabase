@@ -39,7 +39,7 @@ We're excited to announce that in the near future, EncryptedDatabase will be int
    npm install -g mops
    ```
 
-3. Install project dependencies:
+3. Install base mops:
    ```
    mops add base
    ```
