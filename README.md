@@ -20,7 +20,7 @@ EncryptedDatabase is a decentralized and encrypted database solution that runs o
 
 - [DFINITY Canister Developer Kit](https://internetcomputer.org/docs/current/developer-docs/getting-started/install/)
 - [Node.js](https://nodejs.org/) (version 20.17 or higher)
-- [mops](https://github.com/mops-cli/mops)
+- mops
 
 ### How to Set Up
 
