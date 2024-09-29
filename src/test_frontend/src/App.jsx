@@ -18,6 +18,7 @@ function App() {
   const [queryResult, setQueryResult] = useState([]);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [allData, setAllData] = useState([]);
 
   useEffect(() => {
     initAuth();
@@ -68,6 +69,7 @@ function App() {
     setQueryResult([]);
     setNewTableName('');
     setNewTableColumns(['']);
+    setAllData([]);
   };
 
   const showError = (message) => {
@@ -156,6 +158,7 @@ function App() {
 
   const handleQuery = async (columnName) => {
     setIsLoading(true);
+    setAllData([]);
     try {
       const result = await test_backend.select(userPrincipal, selectedTable.name, columnName);
       if ('ok' in result) {
@@ -165,6 +168,23 @@ function App() {
       }
     } catch (err) {
       showError(`Failed to query data: ${err.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleQueryAll = async () => {
+    setIsLoading(true);
+    setQueryResult([]);
+    try {
+      const result = await test_backend.selectAll(userPrincipal, selectedTable.name);
+      if ('ok' in result) {
+        setAllData(result.ok);
+      } else {
+        throw new Error(result.err);
+      }
+    } catch (err) {
+      showError(`Failed to query all data: ${err.message}`);
     } finally {
       setIsLoading(false);
     }
@@ -187,7 +207,16 @@ function App() {
   };
 
   return (
-    <div className="App">
+    <div className="App relative">
+      {isLoading && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 z-50 flex justify-center items-center">
+          <div className="bg-white p-5 rounded-lg shadow-xl">
+            <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
+            <p className="mt-4 text-gray-700 font-semibold">Yükleniyor...</p>
+          </div>
+        </div>
+      )}
+  
       <h1>Encrypted Database</h1>
       
       {!isAuthenticated ? (
@@ -198,164 +227,118 @@ function App() {
           <button onClick={logout} className="auth-button">Logout</button>
         </div>
       )}
-
+  
       {error && <div className="error-message">{error}</div>}
-      {isLoading && <div className="loading-spinner">Loading...</div>}
       
       {isAuthenticated && (
         <>
-
-        <div className="create-table-section">
-       
-       <h2>Create New Table</h2>
-       
-       <input
-       
-       type="text"
-       
-       value={newTableName}
-       
-       onChange={(e) => setNewTableName(e.target.value)}
-       
-       placeholder="Table Name"
-       
-       />
-       
-       {newTableColumns.map((col, index) => (
-       
-       <div key={index} className="column-input">
-       
-       <input
-       
-       type="text"
-       
-       value={col}
-       
-       onChange={(e) => handleColumnChange(index, e.target.value)}
-       
-       placeholder={`Column ${index + 1}`}
-       
-       />
-       
-       <button onClick={() => handleRemoveColumn(index)}>Remove</button>
-       
-       </div>
-       
-        ))}
-       
-       <button onClick={handleAddColumn}>Add Column</button>
-       
-       <button onClick={handleCreateTable}>Create Table</button>
-       
-       </div>
-       
-       <div className="tables-list">
-       
-       <h2>Your Tables</h2>
-       
-       <ul>
-       
-       {tables.map(table => (
-       
-       <li key={table}>
-       
-       <span onClick={() => handleSelectTable(table)}>{table}</span>
-       
-       <button onClick={() => handleDeleteTable(table)} className="delete-button">Delete</button>
-       
-       </li>
-       
-        ))}
-       
-       </ul>
-       
-       </div>
-       
-       {selectedTable && (
-       
-       <div className="selected-table">
-       
-       <h2>{selectedTable.name}</h2>
-       
-       <p>Columns: {selectedTable.columns.join(', ')}</p>
-       
-       <p>Rows: {selectedTable.rowCount}</p>
-       
-       <h3>Insert New Row</h3>
-       
-       {selectedTable.columns.map(col => (
-       
-       <input
-       
-       key={col}
-       
-       type="text"
-       
-       value={newRowData[col] || ''}
-       
-       onChange={(e) => setNewRowData({...newRowData, [col]: e.target.value})}
-       
-       placeholder={col}
-       
-       />
-       
-        ))}
-       
-       <button onClick={handleInsertRow}>Insert Row</button>
-       
-       <h3>Query Data</h3>
-       
-       {selectedTable.columns.map(col => (
-       
-       <button key={col} onClick={() => handleQuery(col)}>Query {col}</button>
-       
-        ))}
-       
-       {queryResult.length > 0 && (
-       
-       <table>
-       
-       <thead>
-       
-       <tr>
-       
-       <th>Index</th>
-       
-       <th>Value</th>
-       
-       </tr>
-       
-       </thead>
-       
-       <tbody>
-       
-       {queryResult.map((item, index) => (
-       
-       <tr key={index}>
-       
-       <td>{index + 1}</td>
-       
-       <td>{item}</td>
-       
-       </tr>
-       
-        ))}
-       
-       </tbody>
-       
-       </table>
-       
-        )}
-       
-       </div>
-       
-        )}
-       
-       </>
-       
-        )}
-       
-       </div>
+          <div className="create-table-section">
+            <h2>Create New Table</h2>
+            <input
+              type="text"
+              value={newTableName}
+              onChange={(e) => setNewTableName(e.target.value)}
+              placeholder="Table Name"
+            />
+            {newTableColumns.map((col, index) => (
+              <div key={index} className="column-input">
+                <input
+                  type="text"
+                  value={col}
+                  onChange={(e) => handleColumnChange(index, e.target.value)}
+                  placeholder={`Column ${index + 1}`}
+                />
+                <button onClick={() => handleRemoveColumn(index)}>Remove</button>
+              </div>
+            ))}
+            <button onClick={handleAddColumn}>Add Column</button>
+            <button onClick={handleCreateTable}>Create Table</button>
+          </div>
+          
+          <div className="tables-list">
+            <h2>Your Tables</h2>
+            <ul>
+              {tables.map(table => (
+                <li key={table}>
+                  <span onClick={() => handleSelectTable(table)}>{table}</span>
+                  <button onClick={() => handleDeleteTable(table)} className="delete-button">Delete</button>
+                </li>
+              ))}
+            </ul>
+          </div>
+          
+          {selectedTable && (
+            <div className="selected-table">
+              <h2>{selectedTable.name}</h2>
+              <p>Columns: {selectedTable.columns.join(', ')}</p>
+              <p>Rows: {selectedTable.rowCount}</p>
+              
+              <h3>Insert New Row</h3>
+              {selectedTable.columns.map(col => (
+                <input
+                  key={col}
+                  type="text"
+                  value={newRowData[col] || ''}
+                  onChange={(e) => setNewRowData({...newRowData, [col]: e.target.value})}
+                  placeholder={col}
+                />
+              ))}
+              <button onClick={handleInsertRow}>Insert Row</button>
+              
+              <h3>Query Data</h3>
+              <div className="query-buttons">
+                {selectedTable.columns.map(col => (
+                  <button key={col} onClick={() => handleQuery(col)}>Query {col}</button>
+                ))}
+                <button onClick={handleQueryAll}>Query All Data</button>
+              </div>
+              
+              {queryResult.length > 0 && (
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Index</th>
+                      <th>Value</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {queryResult.map((item, index) => (
+                      <tr key={index}>
+                        <td>{index + 1}</td>
+                        <td>{item}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+              
+              {allData.length > 0 && (
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Row</th>
+                      {selectedTable.columns.map(col => (
+                        <th key={col}>{col}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {allData.map((row, rowIndex) => (
+                      <tr key={rowIndex}>
+                        <td>{rowIndex + 1}</td>
+                        {row.map((cell, cellIndex) => (
+                          <td key={cellIndex}>{cell}</td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          )}
+        </>
+      )}
+    </div>
   );
 }
 
