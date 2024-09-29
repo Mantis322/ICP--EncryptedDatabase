@@ -30,7 +30,7 @@ We're excited to announce that in the near future, EncryptedDatabase will be int
 
 1. Copy this project to your computer:
    ```
-   git clone https://github.com/your-username/EncryptedDatabase.git
+   git clone https://github.com/Mantis322/EncryptedDatabase.git
    cd EncryptedDatabase
    ```
 
