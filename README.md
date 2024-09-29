@@ -14,6 +14,10 @@ EncryptedDatabase is a decentralized and encrypted database solution that runs o
 - **Secure Access**: Only the owner can access and manage their tables.
 - **CRUD Operations**: Supports basic database operations (Create, Read, Update, Delete).
 
+### 🚀 Coming Soon: Multichain Support
+
+We're excited to announce that in the near future, EncryptedDatabase will be integrated with Chainfusion, enabling database control across multiple blockchains. This expansion will provide even greater flexibility and interoperability for our users, allowing seamless data management across different blockchain networks.
+
 ## 🚀 Getting Started
 
 ### What You Need
