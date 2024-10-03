@@ -30,8 +30,8 @@ We're excited to announce that in the near future, EncryptedDatabase will be int
 
 1. Copy this project to your computer:
    ```
-   git clone https://github.com/Mantis322/EncryptedDatabase.git
-   cd EncryptedDatabase
+   https://github.com/Mantis322/ICP--EncryptedDatabase.git
+   cd ICP--EncryptedDatabase
    ```
 
 2. Install mops (if you don't have it):
