@@ -30,7 +30,7 @@ We're excited to announce that in the near future, EncryptedDatabase will be int
 
 1. Copy this project to your computer:
    ```
-   https://github.com/Mantis322/ICP--EncryptedDatabase.git
+   git clone https://github.com/Mantis322/ICP--EncryptedDatabase.git
    cd ICP--EncryptedDatabase
    ```
 
