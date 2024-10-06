@@ -1,3 +1,13 @@
+import Array "mo:base/Array";
+import Text "mo:base/Text";
+import Nat8 "mo:base/Nat8";
+import Iter "mo:base/Iter";
+import Blob "mo:base/Blob";
+import Option "mo:base/Option";
+import Result "mo:base/Result";
+import Principal "mo:base/Principal";
+import HashMap "mo:base/HashMap";
+
 actor EncryptedDatabase {
     // Type definition for a database table
     private type Table = {
