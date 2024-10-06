@@ -6,6 +6,8 @@
 
 EncryptedDatabase is a decentralized and encrypted database solution that runs on the Internet Computer Protocol (ICP). It helps users store and manage their data safely while using the benefits of blockchain technology.
 
+You can access the demo video of the project [here](https://youtu.be/0gHpXVmwsHU).
+
 ### 🔑 Features
 
 - **Decentralized**: Runs on ICP, so it doesn't depend on a single central server.
